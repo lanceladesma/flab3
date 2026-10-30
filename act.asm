@@ -6,11 +6,6 @@ BITS 32
 %define STDIN     0
 %define STDOUT    1
 
-; -----------------------------
-; Macros
-; -----------------------------
-
-; Prints a zero-terminated string.
 %macro PRINT 1
     mov ecx, %1
     call print_string
@@ -21,7 +16,6 @@ BITS 32
     PRINT newline
 %endmacro
 
-; Prints a label followed by a number and a new line.
 %macro PRINT_AMOUNT 2
     PRINT %1
     mov eax, %2
@@ -81,7 +75,6 @@ section .data
     classOutput db 'Classification: ', 0
     unitsOutput db 'Total units: ', 0
 
-    ; Fixed fees from the reference assessment.
     miscFee     equ 12305
     idFee       equ 80
     labFee      equ 4008
@@ -105,8 +98,6 @@ section .text
     global _start
 
 _start:
-    ; Read all requested information from the top part.
-    ; Classification is intentionally not requested as user input.
     PRINT promptStatus
     mov ecx, enrollmentStatus
     mov edx, 64
@@ -152,21 +143,16 @@ _start:
     mov edx, 32
     call read_line
 
-    ; Convert the units text into a number.
     mov esi, unitsText
     call parse_number
-    mov ebp, eax                    ; save total units
+    mov ebp, eax                   
 
-    ; Compute tuition and total assessment.
     mov eax, ebp
-    call calculate_tuition          ; EAX = tuition fee
-    mov edi, eax                    ; save tuition fee
-    add eax, fixedFees              ; EAX = total assessment
-    mov ebx, eax                    ; save total assessment
+    call calculate_tuition          
+    mov edi, eax                    
+    add eax, fixedFees              
+    mov ebx, eax                    
 
-    ; -----------------------------
-    ; Display the completed assessment
-    ; -----------------------------
     PRINT title
     PRINT studentLbl
 
@@ -197,7 +183,7 @@ _start:
     PRINT classOutput
     NEWLINE
     NEWLINE
-    ; Courses are pre-printed. No course input is requested.
+
     PRINT header
     PRINT courseHead
     PRINT courseLine
@@ -233,10 +219,6 @@ _start:
     xor ebx, ebx
     int 0x80
 
-; ------------------------------------------------------------
-; Procedure: print_string
-; Input: ECX = address of a zero-terminated string
-; ------------------------------------------------------------
 print_string:
     push eax
     push ebx
@@ -261,11 +243,6 @@ print_string:
     pop eax
     ret
 
-; ------------------------------------------------------------
-; Procedure: read_line
-; Input: ECX = buffer address, EDX = buffer size
-; Removes the Enter key from the input.
-; ------------------------------------------------------------
 read_line:
     push ebx
     push esi
@@ -298,11 +275,6 @@ read_line:
     pop ebx
     ret
 
-; ------------------------------------------------------------
-; Procedure: parse_number
-; Input: ESI = address of decimal text
-; Output: EAX = converted unsigned integer
-; ------------------------------------------------------------
 parse_number:
     xor eax, eax
 .next_digit:
@@ -320,19 +292,10 @@ parse_number:
 .done:
     ret
 
-; ------------------------------------------------------------
-; Procedure: calculate_tuition
-; Input: EAX = total units
-; Output: EAX = total tuition fee
-; ------------------------------------------------------------
 calculate_tuition:
     imul eax, ratePerUnit
     ret
 
-; ------------------------------------------------------------
-; Procedure: print_number
-; Input: EAX = unsigned integer
-; ------------------------------------------------------------
 print_number:
     push eax
     push ebx
